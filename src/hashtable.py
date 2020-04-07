@@ -68,7 +68,7 @@ class HashTable:
         pair = self.storage[index]
         current_node = pair
 
-        # MVP 1 - Just replaces values no linked list chaining
+        # MVP 2 - Hash Collisions Implemented
         # Check if a pair already exists in the bucket
         if pair is not None:
             # If so, check if it is the right key and if right key overwrite
@@ -115,25 +115,20 @@ class HashTable:
         # Get index from hashmode
         index = self._hash_mod(key)
 
+        # Linked List Traveral
+        current_node = self.storage[index]
+
         # Check if a pair exists in the bucket with matching keys
         if self.storage[index] is not None and self.storage[index].key == key:
             # if so, return the value
             return self.storage[index].value
+        elif self.storage[index] is not None and self.storage[index].key != key:
+            while current_node:
+                if current_node.key == key:
+                    return current_node.value
+                current_node = current_node.next
         else:
             return None
-
-        # # Get correct location to look into
-        # location = self.storage[self._hash_mod(key)]
-        # # return location.value
-        # # Check if this is the right key:value pair
-        # if location.key != key:
-        #     while location:
-        #         print(location.key, key)
-        #         if location.key == key:
-        #             return location.value
-        #         location = location.next
-        # else:
-        #     return location.value
 
     def resize(self):
         '''
@@ -161,10 +156,6 @@ if __name__ == "__main__":
 
     print("")
     print(ht.storage)
-    print(f"this is key: {ht.storage[1].key} value: {ht.storage[1].value}")
-    print(f"this is key: {ht.storage[0].key} value: {ht.storage[0].value}")
-    print(
-        f"this is key: {ht.storage[0].next.key} value: {ht.storage[0].next.value}")
 
     # Test storing beyond capacity
     print(ht.retrieve("line_1"))
