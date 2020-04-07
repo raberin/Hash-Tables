@@ -62,26 +62,28 @@ class HashTable:
         obj = LinkedPair(key, value)
         # Increment entries
         self.entries += 1
-
         # Linked List Chaining
         index = self._hash_mod(key)
         pair = self.storage[index]
         current_node = pair
-
         # MVP 2 - Hash Collisions Implemented
         # Check if a pair already exists in the bucket
-        if pair is not None:
-            # If so, check if it is the right key and if right key overwrite
-            if pair.key != key:
-                # loop through until end
-                while current_node.next != None:
-                    # If key is found, overwrite value
-                    if current_node.key == key:
-                        current_node.value = value
-                        break
-                    current_node = current_node.next
-                # At the end of the linked list append new LinkedPair to tail
-                current_node.next = obj
+        if pair is not None and pair.key == key:
+            # Overwrite value
+            pair.value = value
+        # If so, check if it is the right key and if right key overwrite
+        elif pair is not None and pair.key != key:
+            # loop through until end
+            while current_node:
+                # If key is found, overwrite value
+                if current_node.key == key:
+                    current_node.value = value
+                    break
+                # If no key found, append to tail
+                elif current_node.next == None:
+                    current_node.next = obj
+                    break
+                current_node = current_node.next
         else:
             # If not, Create a new LinkedPair and place it in the bucket
             self.storage[index] = obj
@@ -94,12 +96,11 @@ class HashTable:
 
         Fill this in.
         '''
+        self.entries -= 1
         index = self._hash_mod(key)
         # check if pair exists in the bucket with matching keys
-
         # Linked List Traveral
         current_node = self.storage[index]
-
         # If the node to be deleted is the head
         if self.storage[index] is not None and self.storage[index].key == key:
             # If so remove that pair by setting it to the linked list next value
@@ -129,10 +130,8 @@ class HashTable:
         '''
         # Get index from hashmode
         index = self._hash_mod(key)
-
         # Linked List Traveral
         current_node = self.storage[index]
-
         # Check if a pair exists in the bucket with matching keys
         if self.storage[index] is not None and self.storage[index].key == key:
             # if so, return the value
@@ -155,17 +154,44 @@ class HashTable:
         load_factor = self.entries / self.capacity
         new_capacity = self.capacity * 2
         if load_factor >= 0.7:
+            # Create new bigger table
             new_table = [None] * new_capacity
+            # Loop through storage
             for pair in self.storage:
                 if pair != None:
-                    new_table[self._hash(pair.key) % new_capacity] = pair
+                    current_node = pair
+                    # Traverse current node
+                    while current_node:
+                        # Save next node
+                        next_node = current_node.next
+                        # Save new hashing index
+                        new_hash_index = self._hash(
+                            current_node.key) % new_capacity
+                        # Rehash and place current_node in new table
+                        # If current index is filled traverse new_table linked list
+                        if new_table[new_hash_index] is not None:
+                            new_table_head = new_table[new_hash_index]
+                            while new_table_head:
+                                if new_table_head.next == None:
+                                    new_table_head.next = current_node
+                                    break
+                                new_table_head = new_table_head.next
+                        else:
+                            new_table[new_hash_index] = current_node
+                        # Remove current_nodes next value
+                        current_node.next = None
+                        # Set current_node -> next_node
+                        current_node = next_node
+            # Set new_table as the self.storage
             self.storage = new_table
+            self.capacity = new_capacity
 
 
 if __name__ == "__main__":
     ht = HashTable(2)
 
     ht.insert("line_1", "Tiny hash table")
+    ht.insert("line_1", "Tiny hash")
     ht.insert("line_2", "Filled beyond capacity")
     ht.insert("line_3", "Linked list saves the day!")
 
@@ -177,16 +203,17 @@ if __name__ == "__main__":
     print(ht.retrieve("line_2"))
     print(ht.retrieve("line_3"))
 
-    # # Test resizing
-    # old_capacity = len(ht.storage)
-    # ht.resize()
-    # new_capacity = len(ht.storage)
+    # Test resizing
+    old_capacity = len(ht.storage)
+    ht.resize()
+    new_capacity = len(ht.storage)
 
-    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # # Test if data intact after resizing
-    # print(ht.retrieve("line_1"))
-    # print(ht.retrieve("line_2"))
-    # print(ht.retrieve("line_3"))
+    # Test if data intact after resizing
+    print(ht.retrieve("line_1"))
+    print(ht.retrieve("line_2"))
+    print(ht.retrieve("line_3"))
+    print(ht.storage)
 
-    # print("")
+    print("")
