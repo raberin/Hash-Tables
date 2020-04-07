@@ -9,8 +9,8 @@ class LinkedPair:
         self.value = value
         self.next = None
 
-    # def __repr__(self):
-    #     return f"<{self.key}, {self.value}>"
+    def __repr__(self):
+        return f"<{self.key}, {self.value}>"
 
 
 class HashTable:
@@ -97,9 +97,24 @@ class HashTable:
         index = self._hash_mod(key)
         # check if pair exists in the bucket with matching keys
 
+        # Linked List Traveral
+        current_node = self.storage[index]
+
+        # If the node to be deleted is the head
         if self.storage[index] is not None and self.storage[index].key == key:
-            # If so remove that pair
-            self.storage[index] = None
+            # If so remove that pair by setting it to the linked list next value
+            self.storage[index] = self.storage[index].next
+            return current_node
+        elif self.storage[index] is not None and self.storage[index].key != key:
+            while current_node.next:
+                # If the next node is the node to be deleted
+                if current_node.next.key == key:
+                    # save deleted node
+                    deleting = current_node.next
+                    # Replace current nodes next to the one after deleted
+                    current_node.next = deleting.next
+                    return deleting
+                current_node = current_node.next
         else:
             # Else print warning
             print("Warning: Key does not exist")
