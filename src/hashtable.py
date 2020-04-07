@@ -9,6 +9,9 @@ class LinkedPair:
         self.value = value
         self.next = None
 
+    # def __repr__(self):
+    #     return f"<{self.key}, {self.value}>"
+
 
 class HashTable:
     '''
@@ -61,36 +64,27 @@ class HashTable:
         self.entries += 1
 
         # Linked List Chaining
-        # insertion_spot = self.storage[self._hash_mod(key)]
         index = self._hash_mod(key)
         pair = self.storage[index]
+        current_node = pair
 
         # MVP 1 - Just replaces values no linked list chaining
         # Check if a pair already exists in the bucket
-        pair = self.storage[index]
         if pair is not None:
-            # If so, overwrite the key/value and throw a warning
+            # If so, check if it is the right key and if right key overwrite
             if pair.key != key:
-                print("Warning: Overwriting value")
-                pair.key = key
-            pair.value = value
+                # loop through until end
+                while current_node.next != None:
+                    # If key is found, overwrite value
+                    if current_node.key == key:
+                        current_node.value = value
+                        break
+                    current_node = current_node.next
+                # At the end of the linked list append new LinkedPair to tail
+                current_node.next = obj
         else:
             # If not, Create a new LinkedPair and place it in the bucket
-            self.storage[index] = LinkedPair(key, value)
-
-        # # Check if spot in hash table is empty
-        # if insertion_spot != None:
-        #     # If not empty, loop through till the end then insert
-        #     while insertion_spot.next:
-        #         print(insertion_spot.next)
-        #         if insertion_spot.next == None:
-        #             insertion_spot.next = obj
-        #         else:
-        #             insertion_spot = insertion_spot.next
-        # else:
-        #     # Set obj in respected hashed index in storage
-        #     self.storage[self._hash_mod(key)] = obj
-        # # print(self.storage)
+            self.storage[index] = obj
 
     def remove(self, key):
         '''
@@ -167,26 +161,26 @@ if __name__ == "__main__":
 
     print("")
     print(ht.storage)
-    # print(f"this is key: {ht.storage[1].key} value: {ht.storage[1].value}")
-    # print(f"this is key: {ht.storage[0].key} value: {ht.storage[0].value}")
-    # print(
-    #     f"this is key: {ht.storage[0].next} value: {ht.storage[0].next.value}")
+    print(f"this is key: {ht.storage[1].key} value: {ht.storage[1].value}")
+    print(f"this is key: {ht.storage[0].key} value: {ht.storage[0].value}")
+    print(
+        f"this is key: {ht.storage[0].next.key} value: {ht.storage[0].next.value}")
 
     # Test storing beyond capacity
     print(ht.retrieve("line_1"))
     print(ht.retrieve("line_2"))
     print(ht.retrieve("line_3"))
 
-    # Test resizing
-    old_capacity = len(ht.storage)
-    ht.resize()
-    new_capacity = len(ht.storage)
+    # # Test resizing
+    # old_capacity = len(ht.storage)
+    # ht.resize()
+    # new_capacity = len(ht.storage)
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # Test if data intact after resizing
-    print(ht.retrieve("line_1"))
-    print(ht.retrieve("line_2"))
-    print(ht.retrieve("line_3"))
+    # # Test if data intact after resizing
+    # print(ht.retrieve("line_1"))
+    # print(ht.retrieve("line_2"))
+    # print(ht.retrieve("line_3"))
 
-    print("")
+    # print("")
