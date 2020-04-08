@@ -152,39 +152,25 @@ class HashTable:
         Fill this in.
         '''
         load_factor = self.entries / self.capacity
-        new_capacity = self.capacity * 2
+        # Save previous storage
+        old_storage = self.storage
+        # Increase storage by 2x
+        self.capacity = self.capacity * 2
+        self.storage = [None] * self.capacity
         if load_factor >= 0.7:
-            # Create new bigger table
-            new_table = [None] * new_capacity
             # Loop through storage
-            for pair in self.storage:
+            for pair in old_storage:
                 if pair != None:
                     current_node = pair
                     # Traverse current node
                     while current_node:
                         # Save next node
                         next_node = current_node.next
-                        # Save new hashing index
-                        new_hash_index = self._hash(
-                            current_node.key) % new_capacity
                         # Rehash and place current_node in new table
                         # If current index is filled traverse new_table linked list
-                        if new_table[new_hash_index] is not None:
-                            new_table_head = new_table[new_hash_index]
-                            while new_table_head:
-                                if new_table_head.next == None:
-                                    new_table_head.next = current_node
-                                    break
-                                new_table_head = new_table_head.next
-                        else:
-                            new_table[new_hash_index] = current_node
-                        # Remove current_nodes next value
-                        current_node.next = None
+                        self.insert(current_node.key, current_node.value)
                         # Set current_node -> next_node
                         current_node = next_node
-            # Set new_table as the self.storage
-            self.storage = new_table
-            self.capacity = new_capacity
 
 
 if __name__ == "__main__":
