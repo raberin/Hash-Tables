@@ -1,21 +1,28 @@
 # '''
 # Linked List hash table key/value pair
 # '''
+
+
 class LinkedPair:
     def __init__(self, key, value):
         self.key = key
         self.value = value
         self.next = None
 
+    def __repr__(self):
+        return f"<{self.key}, {self.value}>"
+
+
 class HashTable:
     '''
     A hash table that with `capacity` buckets
     that accepts string keys
     '''
+
     def __init__(self, capacity):
         self.capacity = capacity  # Number of buckets in the hash table
         self.storage = [None] * capacity
-
+        self.entries = 0
 
     def _hash(self, key):
         '''
@@ -25,7 +32,6 @@ class HashTable:
         '''
         return hash(key)
 
-
     def _hash_djb2(self, key):
         '''
         Hash an arbitrary key using DJB2 hash
@@ -34,14 +40,12 @@ class HashTable:
         '''
         pass
 
-
     def _hash_mod(self, key):
         '''
         Take an arbitrary key and return a valid integer index
         within the storage capacity of the hash table.
         '''
         return self._hash(key) % self.capacity
-
 
     def insert(self, key, value):
         '''
@@ -54,9 +58,35 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
-
-
+        # Create LinkedPair obj
+        obj = LinkedPair(key, value)
+        # Increment entries
+        self.entries += 1
+        # Linked List Chaining
+        index = self._hash_mod(key)
+        pair = self.storage[index]
+        current_node = pair
+        # MVP 2 - Hash Collisions Implemented
+        # Check if a pair already exists in the bucket
+        if pair is not None and pair.key == key:
+            # Overwrite value
+            pair.value = value
+        # If so, check if it is the right key and if right key overwrite
+        elif pair is not None and pair.key != key:
+            # loop through until end
+            while current_node:
+                # If key is found, overwrite value
+                if current_node.key == key:
+                    current_node.value = value
+                    break
+                # If no key found, append to tail
+                elif current_node.next == None:
+                    current_node.next = obj
+                    break
+                current_node = current_node.next
+        else:
+            # If not, Create a new LinkedPair and place it in the bucket
+            self.storage[index] = obj
 
     def remove(self, key):
         '''
@@ -66,8 +96,29 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
-
+        self.entries -= 1
+        index = self._hash_mod(key)
+        # check if pair exists in the bucket with matching keys
+        # Linked List Traveral
+        current_node = self.storage[index]
+        # If the node to be deleted is the head
+        if self.storage[index] is not None and self.storage[index].key == key:
+            # If so remove that pair by setting it to the linked list next value
+            self.storage[index] = self.storage[index].next
+            return current_node
+        elif self.storage[index] is not None and self.storage[index].key != key:
+            while current_node.next:
+                # If the next node is the node to be deleted
+                if current_node.next.key == key:
+                    # save deleted node
+                    deleting = current_node.next
+                    # Replace current nodes next to the one after deleted
+                    current_node.next = deleting.next
+                    return deleting
+                current_node = current_node.next
+        else:
+            # Else print warning
+            print("Warning: Key does not exist")
 
     def retrieve(self, key):
         '''
@@ -77,8 +128,21 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
-
+        # Get index from hashmode
+        index = self._hash_mod(key)
+        # Linked List Traveral
+        current_node = self.storage[index]
+        # Check if a pair exists in the bucket with matching keys
+        if self.storage[index] is not None and self.storage[index].key == key:
+            # if so, return the value
+            return self.storage[index].value
+        elif self.storage[index] is not None and self.storage[index].key != key:
+            while current_node:
+                if current_node.key == key:
+                    return current_node.value
+                current_node = current_node.next
+        else:
+            return None
 
     def resize(self):
         '''
@@ -87,18 +151,38 @@ class HashTable:
 
         Fill this in.
         '''
-        pass
-
+        load_factor = self.entries / self.capacity
+        # Save previous storage
+        old_storage = self.storage
+        # Increase storage by 2x
+        self.capacity = self.capacity * 2
+        self.storage = [None] * self.capacity
+        if load_factor >= 0.7:
+            # Loop through storage
+            for pair in old_storage:
+                if pair != None:
+                    current_node = pair
+                    # Traverse current node
+                    while current_node:
+                        # Save next node
+                        next_node = current_node.next
+                        # Rehash and place current_node in new table
+                        # If current index is filled traverse new_table linked list
+                        self.insert(current_node.key, current_node.value)
+                        # Set current_node -> next_node
+                        current_node = next_node
 
 
 if __name__ == "__main__":
     ht = HashTable(2)
 
     ht.insert("line_1", "Tiny hash table")
+    ht.insert("line_1", "Tiny hash")
     ht.insert("line_2", "Filled beyond capacity")
     ht.insert("line_3", "Linked list saves the day!")
 
     print("")
+    print(ht.storage)
 
     # Test storing beyond capacity
     print(ht.retrieve("line_1"))
@@ -116,5 +200,6 @@ if __name__ == "__main__":
     print(ht.retrieve("line_1"))
     print(ht.retrieve("line_2"))
     print(ht.retrieve("line_3"))
+    print(ht.storage)
 
     print("")
